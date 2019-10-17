@@ -1,0 +1,1 @@
+GET http://127.0.0.1:3000/numbers?u=http://127.0.0.1:8090/primes&u=http://127.0.0.1:8090/rand

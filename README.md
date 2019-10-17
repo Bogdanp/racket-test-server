@@ -1,26 +1,32 @@
 # Racket Test Server
 
-To test a Racket web server making many synchronous requests and performing under a hard deadline, I made this project. The program should accept a request on `/numbers` endpoint with various ?u parameter queries. The server should perform a GET request on each endpoint obtaining a json list of numbers (ex `{numbers: [1, 2, 3]}`), and then aggregate all the results. The application should always return a response under 500ms, even if it couldn't get any numbers.
+This project tests a Racket web server making many synchronous
+requests under a hard deadline.
+
+The server accepts a request on the `/numbers` endpoint with various
+`?u` query parameters.  It then performs a GET request on each
+endpoint obtaining a JSON list of numbers and aggregates all the
+results.
+
+The application must always return a response under 500ms, even if it
+couldn't get any numbers.
 
 ## Running the example
 
-The exercise can be run via `racket server.rkt`. To run with the GC logs and with incremental GC you can run `PLTSTDERR=debug PLT_INCREMENTAL_GC=1 racket challenge.rkt`.
+You need [go] and [vegeta].
 
-An example request to the server looks like the following:
+In three separate terminal windows, run:
 
-```
-curl localhost:3000/numbers\?u=http://localhost:8090/primes\&u=http://localhost:8090/primes\&u=http://localhost:8090/primes\&u=http://localhost:8090/primes\&u=http://localhost:8090/primes\&u=http://localhost:8090/primes
-```
+1. `go run numberserver.go`
+2. `env PLT_INCREMENTAL_GC=1 racket server.rkt`
+3. `./loadtest.sh targets-flawed results-flawed.bin plot-flawed.html`
+3. `./loadtest.sh targets results.bin plot.html`
 
-Provided in the repository is a server written in Go that has various endpoints ("/primes", "fibo", "/odd", and "/rand") for testing the server. A random delay between 0 and 20ms is also included. If you have Go installed, you can run the number server via `go run numberserver.go`. 
+To find out how to tweak the load test, read [vegeta]'s documentation.
 
+## Acknowledgements
 
-## Benchmarking
+This project was originally created by [@zkry](https://github.com/zkry).
 
-For benchmarking the performance I used the tool vegeta: https://github.com/tsenart/vegeta . With vegeta installed you can perform a stress test with:
-
-```
-echo 'GET http://localhost:3000/numbers?u=http://localhost:8090/primes&u=http://localhost:8090/random' | vegeta attack -duration=5m -rate 100/1s | tee results.bin | vegeta plot > plot.html
-```
-
-changing -duration to make the test run for longer or shorter, and changing -rate to change the rate that the server is hit with requests. Opening plot.html shows a plot of the performance and `cat results.bin | vegeta report` will show a statistical summary of the results.
+[go]: https://golang.org
+[vegeta]: https://github.com/tsenart/vegeta

@@ -1,0 +1,2 @@
+# The second URL is intentionally one that returns a 404 response.
+GET http://127.0.0.1:3000/numbers?u=http://127.0.0.1:8090/primes&u=http://127.0.0.1:8090/random

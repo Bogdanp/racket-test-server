@@ -25,7 +25,6 @@ func handler(numbers []int) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		waitPeriod := rand.Intn(20)
 		log.Printf("%s: waiting %dms.", r.URL.Path, waitPeriod)
-
 		time.Sleep(time.Duration(waitPeriod) * time.Millisecond)
 
 		x := rand.Intn(100)
