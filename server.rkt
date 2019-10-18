@@ -58,6 +58,7 @@
         alarm
         (λ _ nums)))))
 
+  (sleep 2)
   (response/output
    #:code 200
    #:mime-type #"application/json; charset=utf-8"
