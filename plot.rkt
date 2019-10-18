@@ -81,6 +81,20 @@
 
     (values filename points)))
 
+(define memory-use-by-filename
+  (for/hash ([filename (in-list gc-filenames)])
+    (define data (load-dataset filename))
+    (define first-moment (iso8601->moment (hash-ref (car data) 'timestamp)))
+    (define points
+      (for/list ([data-point (in-list data)])
+        (list (milliseconds-between
+               first-moment
+               (iso8601->moment (hash-ref data-point 'timestamp)))
+              (hash-ref data-point 'before))))
+
+    (values filename points)))
+
+
 (define (scale-y points by)
   (for/list ([point (in-list points)])
     (list (car point)
@@ -88,10 +102,10 @@
 
 (plot-new-window? #t)
 (parameterize ([plot-pen-color-map 'tab20]
-               [plot-y-far-label "gc duration"]
+               [plot-y-far-label "memory use (kb)"]
                [plot-y-far-ticks (ticks-scale (plot-y-ticks)
-                                              (invertible-function (lambda (x) (- x 2000))
-                                                                   (lambda (x) (+ x 2000))))])
+                                              (invertible-function (lambda (x) (* (- x 2000) 40))
+                                                                   (lambda (x) (/ (+ x 2000) 40))))])
   (plot #:width 1600
         #:height 600
         #:x-label "time"
@@ -102,6 +116,10 @@
                   #:label filename
                   #:color (if (regexp-match? #rx"old" filename) 6 4)
                   #:alpha 0.75))
+         (for/list ([(filename ps) (in-hash memory-use-by-filename)])
+           (lines (scale-y ps (lambda (y) (+ 2000 (/ (/ y 1000) 40))))
+                  #:label filename
+                  #:color (if (regexp-match? #rx"old" filename) 13 0)))
          (for/list ([(filename ps) (in-hash gc-points-by-filename)])
            (points (scale-y ps (lambda (y) (+ 2000 y)))
                    #:label filename
