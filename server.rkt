@@ -77,7 +77,9 @@
     (serve
      #:dispatch (dispatch/servlet go)
      #:port 3000
-     #:initial-connection-timeout 30))
+     #:initial-connection-timeout 30
+     #:request-read-timeout 60
+     ))
 
   (displayln "Listening on port 3000")
   (with-handlers ([exn:break? (lambda _ (shutdown))])

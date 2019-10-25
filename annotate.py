@@ -26,7 +26,7 @@ try:
         if line.startswith('GC:'):
             data = GC_RE.match(line).groupdict()
             sys.stderr.write(json.dumps({
-                'timestamp': datetime.datetime.utcnow().isoformat(),
+                'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',
                 'type': data['type'].lower(),
                 'before': numberify(data['before']),
                 'after': numberify(data['after']),
@@ -37,6 +37,6 @@ try:
             sys.stderr.write('\n')
 
         else:
-            print(line)
+            print(line.rstrip())
 except KeyboardInterrupt:
     pass

@@ -6,40 +6,13 @@
          plot
          racket/class
          racket/cmdline)
-#;
-(define-values (filenames gc-filenames)
-  (values
-   (list "results-flawed-old.json"
-         "results-flawed-new.json")
-   (list)))
-
-#;
-(define-values (filenames gc-filenames)
-  (values
-   (list "results-old.json"
-        "results-new.json")
-   (list)))
-
-#;
-(define-values (filenames gc-filenames)
-  (values
-   (list "results-old-200.json"
-         "results-new-200.json")
-   (list)))
-
-#;
-(define-values (filenames gc-filenames)
-  (values
-   (list "results-2s.100qps.old.json"
-         "results-2s.100qps.new.json")
-   (list)))
 
 (define-values (filenames gc-filenames)
   (values
-   (list "results-2s.100qps.old.json"
-         "results-2s.100qps.gc.new.json")
-   (list "gc-2s.100qps.gc.old.json"
-         "gc-2s.100qps.gc.new.json")))
+   (list "100qps.old.json"
+         "100qps.new.json")
+   (list "gc-100qps.old.json"
+         "gc-100qps.new.json")))
 
 (define (load-dataset filename)
   (sort
@@ -94,14 +67,13 @@
 
     (values filename points)))
 
-
 (define (scale-y points by)
   (for/list ([point (in-list points)])
     (list (car point)
           (by (cadr point)))))
 
-(plot-new-window? #t)
-(parameterize ([plot-pen-color-map 'tab20]
+(parameterize ([plot-new-window? #t]
+               [plot-pen-color-map 'tab20]
                [plot-y-far-label "memory use (kb)"]
                [plot-y-far-ticks (ticks-scale (plot-y-ticks)
                                               (invertible-function (lambda (x) (* (- x 2000) 40))
@@ -114,15 +86,24 @@
          (for/list ([(filename ps) (in-hash points-by-filename)])
            (lines ps
                   #:label filename
-                  #:color (if (regexp-match? #rx"old" filename) 6 4)
+                  #:color (cond
+                            [(regexp-match? #rx"old" filename) 13]
+                            [(regexp-match? #rx"latest" filename) 2]
+                            [else 0])
                   #:alpha 0.75))
          (for/list ([(filename ps) (in-hash memory-use-by-filename)])
            (lines (scale-y ps (lambda (y) (+ 2000 (/ (/ y 1000) 40))))
                   #:label filename
-                  #:color (if (regexp-match? #rx"old" filename) 13 0)))
+                  #:color (cond
+                            [(regexp-match? #rx"old" filename) 13]
+                            [(regexp-match? #rx"latest" filename) 2]
+                            [else 0])))
          (for/list ([(filename ps) (in-hash gc-points-by-filename)])
            (points (scale-y ps (lambda (y) (+ 2000 y)))
                    #:label filename
                    #:sym 'times
                    #:size 10
-                   #:color (if (regexp-match? #rx"old" filename) 13 0))))))
+                   #:color (cond
+                             [(regexp-match? #rx"old" filename) 13]
+                             [(regexp-match? #rx"latest" filename) 2]
+                             [else 0]))))))
